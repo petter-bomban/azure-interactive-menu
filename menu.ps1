@@ -65,7 +65,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     ##################################################
 
     ## Set storage account name
-    $ComputeObject.storage_acc  = "$($ComputeObject.vmn_ame)_store"
+    $ComputeObject.storage_acc  = "$($ComputeObject.vm_name)_store"
 
     ## VM name length
     $vmname_length = ($ComputeObject.vm_name).Length
