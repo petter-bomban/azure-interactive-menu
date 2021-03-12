@@ -28,7 +28,7 @@ function New-AzureBaselineEnvironment ($Conf) {
         ## Resource Group
         ##################################################
         $rg_args = @{
-            Name = $Conf.rg_name
+            Name     = $Conf.rg_name
             Location = $conf.location
         }
         $rg_obj = New-AzResourceGroup @rg_args
@@ -37,13 +37,38 @@ function New-AzureBaselineEnvironment ($Conf) {
         ## Subnet
         ##################################################
         $subnet_args = @{
-            Name = $conf.subnet_name
+            Name          = $conf.subnet_name
             AddressPrefix = $conf.ip_subnet
         }
         $subnet_obj = New-AzVirtualNetworkSubnetConfig @subnet_args
         $resources_created += $subnet_obj
 
-        ## TODO...
+        ## VNET
+        ##################################################
+        $vnet_args = @{
+            ResourceGroupName = $conf.rg_name
+            Location          = $conf.location
+            Name              = $conf.vnet_name
+            AddressPrefix     = $conf.ip_range
+            Subnet            = $subnet_obj
+        }
+        $vnet_obj = New-AzVirtualNetwork @vnet_args
+        $resources_created += vnet_obj
+
+        ## VM
+        ##################################################
+        $vm_args = @{
+            Name               = $conf.vm_name
+            ResourceGroupName  = $conf.rg_name
+            Location           = $conf.location
+            VirtualNetworkName = $conf.vnet_name
+            SubnetName         = $conf.subnet_name
+            Size               = $conf.vm_size
+        }
+        $vm_obj = New-AzVM @vm_args
+        $resources_created += $vm_obj
+        
+
     }
     catch {
         $ErrorMessage = $_.Exception.Message
