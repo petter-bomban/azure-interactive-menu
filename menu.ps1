@@ -16,46 +16,53 @@ function Get-AzureEnvMenu () {
         location        = $null
         vnet            = $null
         subnet          = $null
-        ip_range        = $null
-        ip_subnet       = $null
+        ip_range        = "10.0.0.0/16"
+        ip_subnet       = "10.0.1.0/24"
         ip_nsg          = $null
         vmname          = $null
-        vmsize          = $null
+        vmsize          = "Standard_F2"
         vmtype          = $null
-        storage_acc     = "[automatic]"
-        offer           = "[automatic]"
-        sku             = "[automatic]"
+        storage_acc     = "[auto]"
+        offer           = "[auto]"
+        sku             = "[auto]"
     }
 
     Write-ObjectToHost $ComputeObject
+
     Write-Host "You will now be asked to configure the above variables.
-    "
+    Some properties have default values that can be left empty.`r`n"
 
-    $ComputeObject.rg           = Read-Host "Resource Group name: "
-    $ComputeObject.location     = Read-Host "Geographic Location: "
-    $ComputeObject.vnet         = Read-Host "Virtual Network name: "
-    $ComputeObject.subnet       = Read-Host "Subnet name: "
-    $ComputeObject.ip_range     = Read-Host "Enter IP Range for Customer (default 10.0.0.0/16): "
-    $ComputeObject.ip_subnet    = Read-Host "Enter primary subnet (default 10.0.1.0/24): "
-    $ComputeObject.ip_nsg       = Read-Host "Network Security Group name: "
+    ## Loop through each property in the object and ask for a value
+    foreach ($property in $ComputeObject.PsObject.Properties) {
 
-    $ComputeObject.vmsize       = Read-Host "VM Size (default Standard_F2): "
-    $ComputeObject.vmname       = Read-Host "VM Name (15 character limit): "
-    $ComputeObject.vmtype       = Read-Host "Desktop or Server? (D/S, default S): "
-    
-    $ComputeObject.storage_acc  = "{0}{1}" -f $ComputeObject.vmname, "_store"
+        ## Skip values that are set automatically later on
+        if ($property.Value -eq "[auto]") {
+            continue
+        }
+
+        ## Set desired property value and ensure it is not empty
+        $value = $null
+        while (($value -eq $null) -or (Confirm-IfWhitespace($value))) {
+
+            $value = Read-Host "Set property - $($property.name)[$($property.value)]"
+
+            ## If a property has a default value,
+            # and the $value variable is empty, skip to allow default to subsist
+            if (($property.value -ne $null) -and (Confirm-IfWhitespace($value))) {
+
+                $value = $property.value
+            }
+        }
+
+        $ComputeObject.($property.name) = $value
+    }
 
     ## Verification
     ##################################################
 
-    ## ip range default
-    if (Confirm-IfWhitespace($ComputeObject.ip_range)){
-        $ComputeObject.ip_range = "10.0.0.0/16"
-    }
-    ## ip subnet default
-    if (Confirm-IfWhitespace($ComputeObject.ip_subnet)) {
-        $ComputeObject.ip_subnet = "10.0.1.0/24"
-    }
+    ## Set storage account name
+    $ComputeObject.storage_acc  = "$($ComputeObject.vmname)_store"
+
     ## VM name length
     $vmname_length = ($ComputeObject.vmname).Length
     while (($vmname_length  -gt 15) -or ($vmname_length -le 0)) {
@@ -68,10 +75,7 @@ function Get-AzureEnvMenu () {
 
         $vmname_length = ($ComputeObject.vmname).Length
     }
-    ## VM Size
-    if (Confirm-IfWhitespace($ComputeObject.vmsize)) {
-        $ComputeObject.vmsize = "Standard_F2"
-    }
+
     ## VM Type
     switch ($ComputeObject.vmtype) {
 
@@ -117,6 +121,7 @@ function Get-AzureEnvMenu () {
 
     if ($start -eq $false) {
         return
+        ##TODO: Add in support for starting over with current values already set
     }
 
 
@@ -130,13 +135,12 @@ function Get-AzureEnvMenu () {
 function Get-StartMenu {
 
     $Choice = Read-Host "Please select an option using the number.
-
     [1] Create new Azure baseline environment
     [2] Add Virtual Machine(s) to existing environment
     [3] Add Network[s] to existing environment
     [4] Configure Azure AD DS
-    
-    Selection: "
+
+Selection: "
 
     switch ($Choice) {
 
