@@ -21,7 +21,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
             ip_subnet       = "10.0.1.0/24"
             ip_range        = "10.0.0.0/16"
             ip_nsg          = $null
-            vmn_ame         = $null
+            vm_name         = $null
             vm_size         = "Standard_F2"
             vm_type         = $null
             storage_acc     = "[auto]"
@@ -65,7 +65,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     ##################################################
 
     ## Set storage account name
-    $ComputeObject.storage_acc  = "$($ComputeObject.vmname)_store"
+    $ComputeObject.storage_acc  = "$($ComputeObject.vmn_ame)_store"
 
     ## VM name length
     $vmname_length = ($ComputeObject.vm_name).Length
