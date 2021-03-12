@@ -4,27 +4,30 @@
 ## Menu Functions
 #############################################################
 
-function Get-AzureEnvMenu () {
+function Get-AzureEnvMenu ($ComputeObject = $false) {
 
     ## Initial information gathering
     ##################################################
     
     Get-ASCIIText
 
-    $ComputeObject = [PSCustomObject]@{
-        rg              = $null
-        location        = $null
-        vnet            = $null
-        subnet          = $null
-        ip_range        = "10.0.0.0/16"
-        ip_subnet       = "10.0.1.0/24"
-        ip_nsg          = $null
-        vmname          = $null
-        vmsize          = "Standard_F2"
-        vmtype          = $null
-        storage_acc     = "[auto]"
-        offer           = "[auto]"
-        sku             = "[auto]"
+    ## Set default values
+    if (!($ComputeObject)) {
+        $ComputeObject = [PSCustomObject]@{
+            rg              = $null
+            location        = $null
+            vnet            = $null
+            subnet          = $null
+            ip_range        = "10.0.0.0/16"
+            ip_subnet       = "10.0.1.0/24"
+            ip_nsg          = $null
+            vmname          = $null
+            vmsize          = "Standard_F2"
+            vmtype          = $null
+            storage_acc     = "[auto]"
+            offer           = "[auto]"
+            sku             = "[auto]"
+        }
     }
 
     Write-ObjectToHost $ComputeObject
@@ -33,6 +36,7 @@ function Get-AzureEnvMenu () {
     Some properties have default values that can be left empty.`r`n"
 
     ## Loop through each property in the object and ask for a value
+    ## NOTE: This should become a helper function if same logic is needed elsewhere
     foreach ($property in $ComputeObject.PsObject.Properties) {
 
         ## Skip values that are set automatically later on
@@ -97,10 +101,11 @@ function Get-AzureEnvMenu () {
     Write-ObjectToHost -Object $ComputeObject
 
     $start = $false
+    $confirm = $false
     while (!($confirm)) {
 
         $confirm = Read-Host "Confirm the configuration displayed above.
-        Selecting N will exit back to start menu.
+        Selecting N will allow you to re-configure.
         (Y/N): "
 
         switch ($confirm) {
@@ -120,8 +125,7 @@ function Get-AzureEnvMenu () {
     }
 
     if ($start -eq $false) {
-        return
-        ##TODO: Add in support for starting over with current values already set
+        return Get-AzureEnvMenu -ComputeObject $ComputeObject
     }
 
 
