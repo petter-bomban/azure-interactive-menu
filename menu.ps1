@@ -14,16 +14,16 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     ## Set default values
     if (!($ComputeObject)) {
         $ComputeObject = [PSCustomObject]@{
-            rg              = $null
+            rg_name         = $null
             location        = $null
-            vnet            = $null
-            subnet          = $null
-            ip_range        = "10.0.0.0/16"
+            vnet_name       = $null
+            subnet_name     = $null
             ip_subnet       = "10.0.1.0/24"
+            ip_range        = "10.0.0.0/16"
             ip_nsg          = $null
-            vmname          = $null
-            vmsize          = "Standard_F2"
-            vmtype          = $null
+            vmn_ame         = $null
+            vm_size         = "Standard_F2"
+            vm_type         = $null
             storage_acc     = "[auto]"
             offer           = "[auto]"
             sku             = "[auto]"
@@ -68,28 +68,28 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     $ComputeObject.storage_acc  = "$($ComputeObject.vmname)_store"
 
     ## VM name length
-    $vmname_length = ($ComputeObject.vmname).Length
+    $vmname_length = ($ComputeObject.vm_name).Length
     while (($vmname_length  -gt 15) -or ($vmname_length -le 0)) {
         Write-Host ""
         Write-Host "VM name is too long. or empty. Maximum 15 characters allowed."
-        Write-Host "Current name '$($ComputeObject.vmname)' is $vmname_length characters long."
+        Write-Host "Current name '$($ComputeObject.vm_name)' is $vmname_length characters long."
         Write-Host ""
         
-        $ComputeObject.vmname = Read-Host "Enter a new name: "
+        $ComputeObject.vmn_ame = Read-Host "Enter a new name: "
 
-        $vmname_length = ($ComputeObject.vmname).Length
+        $vmname_length = ($ComputeObject.vm_name).Length
     }
 
     ## VM Type
-    switch ($ComputeObject.vmtype) {
+    switch ($ComputeObject.vm_type) {
 
         "D" {
-            $ComputeObject.vmtype   = "Desktop"
+            $ComputeObject.vm_type   = "Desktop"
             $ComputeObject.offer    = "windows-10-20h2-vhd-server-prod-stage"
             $ComputeObject.sku      = "datacenter-core-20h2-with-containers-smalldisk"
         }
         default {
-            $ComputeObject.vmtype   = "Server"
+            $ComputeObject.vm_type   = "Server"
             $ComputeObject.offer    = "WindowsServer"
             $ComputeObject.sku      = "2019-Datacenter"
         }
@@ -140,11 +140,6 @@ function Connect-ToAzAzure {
     Get-ASCIIText
 
     $Global:session = Connect-AzAccount
-
-    $Global:session
-
-    read-host ""
-
 }
  
 function Get-StartMenu {
