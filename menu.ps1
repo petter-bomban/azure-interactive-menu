@@ -135,24 +135,49 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     # TODO
 }
 
+function Connect-ToAzAzure {
+
+    Get-ASCIIText
+
+    $Global:session = Connect-AzAccount
+
+    $Global:session
+
+    read-host ""
+
+}
  
 function Get-StartMenu {
 
+    if ($global:session) {
+
+        Write-Host "Connected to Azure account $($session.Context.Account.Id)`r`n" -ForegroundColor green
+    }
+
     $Choice = Read-Host "Please select an option using the number.
+    [0] Authenticate to Azure
     [1] Create new Azure baseline environment
     [2] Add Virtual Machine(s) to existing environment
     [3] Add Network[s] to existing environment
     [4] Configure Azure AD DS
 
+    [q] Exit
+
 Selection: "
 
     switch ($Choice) {
 
+        0 {
+            Connect-ToAzAzure
+        }
         1 {
             Get-AzureEnvMenu
         }
         2 {
             # ...
+        }
+        "q" {
+            exit
         }
     }
 }

@@ -2,6 +2,8 @@
 . .\helpers.ps1
 . .\main_funcs.ps1
 . .\menu.ps1
+. .\global_variables.ps1
+
 
 ## Main menu loop
 function Start-AIM {
