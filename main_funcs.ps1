@@ -27,6 +27,7 @@ function New-AzureBaselineEnvironment ($Conf) {
     try {
         ## Resource Group
         ##################################################
+        Write-Host "Resource group"
         $rg_args = @{
             Name        = $conf.rg_name
             Location    = $conf.location
@@ -37,6 +38,7 @@ function New-AzureBaselineEnvironment ($Conf) {
 
         ## Subnet
         ##################################################
+        Write-Host "Subnet"
         $subnet_args = @{
             Name          = $conf.subnet_name
             AddressPrefix = $conf.ip_subnet
@@ -47,6 +49,7 @@ function New-AzureBaselineEnvironment ($Conf) {
 
         ## VNET
         ##################################################
+        Write-Host "VNET"
         $vnet_args = @{
             ResourceGroupName = $conf.rg_name
             Location          = $conf.location
@@ -56,11 +59,12 @@ function New-AzureBaselineEnvironment ($Conf) {
             ErrorAction       = "Stop"
         }
         $vnet_obj = New-AzVirtualNetwork @vnet_args
-        $resources_created += vnet_obj
+        $resources_created += $vnet_obj
 
         ## VM
         ##################################################
         ## Baseline VM
+        Write-Host "Base VM"
         $vm_args = @{
             Name               = $conf.vm_name
             ResourceGroupName  = $conf.rg_name
@@ -74,6 +78,7 @@ function New-AzureBaselineEnvironment ($Conf) {
         $resources_created += $vm_obj
 
         ## Set OS
+        Write-Host "Set OS"
         $vm_os_args = @{
             VM               = $vm_obj
             Windows          = $true
@@ -82,16 +87,26 @@ function New-AzureBaselineEnvironment ($Conf) {
             EnableAutoUpdate = $true
             ErrorAction      = "Stop"
         }
-        Set-AzVMOperatingSystem @vm_os_args
+        $vm_os_obj = Set-AzVMOperatingSystem @vm_os_args
+
+        <#
+        cmdlet Add-AzVMNetworkInterface at command pipeline position 1
+Supply values for the following parameters:
+(Type !? for Help.)
+Id:                       #>
 
         ## Set NIC
+        Write-Host "Set NIC"
+        $vm_id = (Get-AzVM -Name $conf.vm_name).Id 
         $vm_nic_args = @{
-            VM          = $vm_obj
+            VM          = $vm_os_obj
+            Id          = $vm_id
             ErrorAction = "Stop"
         }
         Add-AzVMNetworkInterface @vm_nic_args
 
         ## Set OS Image
+        Write-Host "Set image"
         $vm_image_args = @{
             VM            = $vm_obj
             PublisherName = "MicrosoftWindowsServer"
@@ -102,30 +117,25 @@ function New-AzureBaselineEnvironment ($Conf) {
         }
         $vm_image = Set-AzVMSourceImage @vm_image_args
 
-        ## Finalize creation
-        $vm_final_args = @{
-            ResourceGroupName = $conf.rg_name
-            Location          = $conf.location
-            VM                = $vm_image
-            ErrorAction       = "Stop"
-        }
-
-        $vm_final = New-AzVM @vm_final_obj
-        $resources_created += $vm_final
-
     }
     catch {
         $ErrorMessage = $_.Exception.Message
+        Write-host $ErrorMessage -ForegroundColor red
 
         ## Start rollback
         foreach ($resource in $resources_created) {
 
-            Write-Host "ROLLBACK $resource"
+            Write-Host "ROLLBACK $resource" -ForegroundColor Yellow
             $resource | Remove-AzResource -Force
         }
     }
 
+    ## TODO: File export for easy rollback
+    ## TODO: Rollback in its own function
+    ## TODO: VM Creation and config in its own function
     $resources_created 
+
+    Read-Host "stop.."
 
 
 } 
