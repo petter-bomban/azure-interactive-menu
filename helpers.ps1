@@ -12,9 +12,9 @@ function Confirm-IfWhitespace ($str) {
     return $false
 }
 
-function Get-ASCIIText {
+function Get-ASCIIText ($MenuName = "") {
 
-    $AsciiArt = @'
+    $AsciiArt = @"
      ___  ________  ___
     / _ \|_   _|  \/  |
    / /_\ \ | | | .  . |
@@ -23,11 +23,11 @@ function Get-ASCIIText {
    \_| |_/\___/\_|  |_/  
   Azure Interactive Menu
            v0
-
-'@
+"@
 
     Clear-Host
     Write-Host $AsciiArt
+    Write-Host "  $MenuName`r`n"
 }
 
 function Write-ObjectToHost ($object) {

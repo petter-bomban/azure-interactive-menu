@@ -12,7 +12,7 @@ function Start-AIM {
 
     while ($true) {
 
-        Get-ASCIIText
+        Get-ASCIIText -MenuName "Main Menu"
 
         Get-StartMenu
     }

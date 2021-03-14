@@ -9,7 +9,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     ## Initial information gathering
     ##################################################
     
-    Get-ASCIIText
+    Get-ASCIIText -MenuName "Create baseline environment"
 
     ## Set default values
     if (!($ComputeObject)) {
@@ -145,12 +145,14 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
 
 function Connect-ToAzAzure {
 
-    Get-ASCIIText
+    Get-ASCIIText -MenuName "Connect to Azure"
 
     $Global:session = Connect-AzAccount
 }
 
 Function Remove-ResourceGroup {
+
+    Get-ASCIIText -MenuName "Remove Resource Group"
 
     $rg_name = Read-Host "Type in Resource Group name"
 
