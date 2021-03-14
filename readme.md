@@ -7,6 +7,8 @@ A work-in-progress interactive menu for setting up various Azure resources.
 
 ## TODOs
 
+FIXME: When specifying Windows 10 VM, it creates 2019 Datacenter
+
 - Add single VM to rg
 - Add new network to rg
 - ~~Log all sessions to file~~

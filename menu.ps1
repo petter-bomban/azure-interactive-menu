@@ -52,6 +52,11 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
         $value = $null
         while (($value -eq $null) -or (Confirm-IfWhitespace($value))) {
 
+            ## Instructions specific to the current property
+            if ($property.name -eq "vm_type") {
+                Write-Host "VM type can be either [S]erver or [D]esktop."
+            }
+
             $value = Read-Host "Set property - $($property.name)[$($property.value)]"
 
             ## If a property has a default value,
@@ -87,7 +92,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
     ## VM Type
     switch ($ComputeObject.vm_type) {
 
-        "D" {
+        ({"D" -or "Desktop"}) {
             $ComputeObject.vm_type   = "Desktop"
             $ComputeObject.offer    = "windows-10-20h2-vhd-server-prod-stage"
             $ComputeObject.sku      = "datacenter-core-20h2-with-containers-smalldisk"
