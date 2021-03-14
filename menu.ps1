@@ -23,7 +23,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
             ip_nsg          = $null
             vm_name         = $null
             vm_size         = "Standard_F2"
-            vm_type         = $null
+            vm_type         = "Server"
             storage_acc     = "[auto]"
             offer           = "[auto]"
             sku             = "[auto]"
@@ -131,8 +131,7 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
 
     ## Job Start
     ##################################################
-    read-host "job start..."
-    # TODO
+    New-AzureBaselineEnvironment -Conf $ComputeObject
 }
 
 function Connect-ToAzAzure {
@@ -140,6 +139,34 @@ function Connect-ToAzAzure {
     Get-ASCIIText
 
     $Global:session = Connect-AzAccount
+}
+
+Function Remove-ResourceGroup {
+
+    $rg_name = Read-Host "Type in Resource Group name"
+
+    Write-Warning "THIS WILL DELETE EVERYTHING CONTAINED WITHIN THE RESOURCE GROUP"
+    $proceed = Read-Host "Proceed? [Y/N]"
+
+    if ($proceed -ne "Y") {
+        Write-Host "Will not proceed with resource group deletion"
+        Read-Host "Press Any Key to return..."
+        return
+    }
+
+    ## TODO: Do this as job
+    try {
+        Write-Host "Please wait, this will take a while..."
+        $rg = Get-AzResourceGroup -Name $rg_name
+        $rg | Remove-AzResourceGroup -Force -Confirm:$false
+    }
+    catch {
+        $ErrorMessage = $_.Exception.Message
+        Write-host $ErrorMessage -ForegroundColor red
+
+        Read-Host "Return to main menu..."
+        return
+    }
 }
  
 function Get-StartMenu {
@@ -154,7 +181,7 @@ function Get-StartMenu {
     [1] Create new Azure baseline environment
     [2] Add Virtual Machine(s) to existing environment
     [3] Add Network[s] to existing environment
-    [4] Configure Azure AD DS
+    [4] Remove Resource Group with all sub-resources
 
     [q] Exit
 
@@ -170,6 +197,12 @@ Selection: "
         }
         2 {
             # ...
+        }
+        3 {
+            #
+        }
+        4 {
+            Remove-ResourceGroup
         }
         "q" {
             exit
