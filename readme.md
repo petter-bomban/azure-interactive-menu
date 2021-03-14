@@ -9,7 +9,7 @@ A work-in-progress interactive menu for setting up various Azure resources.
 
 - Add single VM to rg
 - Add new network to rg
-- Log all sessions to file
+- ~~Log all sessions to file~~
 - Log all created resources
 - Use resource logs for automatic rollback from menu
 
