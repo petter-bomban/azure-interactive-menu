@@ -25,6 +25,13 @@ function New-AzureBaselineEnvironment ($Conf) {
     $resources_created = @()
 
     try {
+        ## Setup vm credentials
+        ##################################################
+
+        $pw = ConvertTo-SecureString $conf.vm_acc_pwd -AsPlainText -Force -ErrorAction Stop
+        $cred = New-Object System.Management.Automation.PSCredential ($conf.vm_acc_name, $pw)
+
+
         ## Resource Group
         ##################################################
         Write-Host "Resource group"
@@ -72,9 +79,10 @@ function New-AzureBaselineEnvironment ($Conf) {
             VirtualNetworkName = $conf.vnet_name
             SubnetName         = $conf.subnet_name
             Size               = $conf.vm_size
+            Credential         = $cred
             ErrorAction        = "Stop"
         }
-        $vm_obj = New-AzVM @vm_args
+        $vm_obj = New-AzVM @vm_args 
         $resources_created += $vm_obj
 
         ## Set OS
@@ -85,15 +93,10 @@ function New-AzureBaselineEnvironment ($Conf) {
             ComputerName     = $Conf.vm_name
             ProvisionVMAgent = $true
             EnableAutoUpdate = $true
+            Credential       = $cred
             ErrorAction      = "Stop"
         }
         $vm_os_obj = Set-AzVMOperatingSystem @vm_os_args
-
-        <#
-        cmdlet Add-AzVMNetworkInterface at command pipeline position 1
-Supply values for the following parameters:
-(Type !? for Help.)
-Id:                       #>
 
         ## Set NIC
         Write-Host "Set NIC"
@@ -128,6 +131,9 @@ Id:                       #>
             Write-Host "ROLLBACK $resource" -ForegroundColor Yellow
             $resource | Remove-AzResource -Force
         }
+        
+        Read-Host "Rollback completed, press any key to return"
+        return
     }
 
     ## TODO: File export for easy rollback
@@ -135,7 +141,7 @@ Id:                       #>
     ## TODO: VM Creation and config in its own function
     $resources_created 
 
-    Read-Host "stop.."
+    Read-Host "Function completed, press any key to return"
 
 
 } 

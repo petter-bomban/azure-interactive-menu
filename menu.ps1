@@ -13,9 +13,11 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
 
     ## Set default values
     if (!($ComputeObject)) {
+
+        ## TODO: Set default configuration from config file
         $ComputeObject = [PSCustomObject]@{
             rg_name         = $null
-            location        = $null
+            location        = "westeurope"
             vnet_name       = $null
             subnet_name     = $null
             ip_subnet       = "10.0.1.0/24"
@@ -24,6 +26,8 @@ function Get-AzureEnvMenu ($ComputeObject = $false) {
             vm_name         = $null
             vm_size         = "Standard_F2"
             vm_type         = "Server"
+            vm_acc_name     = ""
+            vm_acc_pwd      = ""
             storage_acc     = "[auto]"
             offer           = "[auto]"
             sku             = "[auto]"
@@ -156,9 +160,9 @@ Function Remove-ResourceGroup {
 
     ## TODO: Do this as job
     try {
-        Write-Host "Please wait, this will take a while..."
         $rg = Get-AzResourceGroup -Name $rg_name
-        $rg | Remove-AzResourceGroup -Force -Confirm:$false
+        $rg | Remove-AzResourceGroup -Force -Confirm:$false -AsJob
+        Read-Host "Deletion started as job, will take a couple of minutes to complete."
     }
     catch {
         $ErrorMessage = $_.Exception.Message
